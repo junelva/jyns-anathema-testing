@@ -1,0 +1,8 @@
+[package]
+name = "color-picker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies.anathema]
+git = "https://github.com/togglebyte/anathema.git"
+branch = "dev"
