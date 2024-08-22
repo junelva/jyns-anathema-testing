@@ -3,7 +3,7 @@ vstack
     // info text
     hstack [height: 2]
         vstack [height: 2, foreground: "white"]
-            text "Presenting: the " title_flavor "buns."
+            text "Presenting: the " title_flavor " buns."
             text" '←/↑/↓/→': move; 'space': ok"
         spacer
         hstack
@@ -27,7 +27,7 @@ vstack
 
         // left sky panel
         expand [id: "sky-left", background: #303080, foreground: #A0A0F0, fill: "*   "]
-            border [border_style: "┌┈┐┊┘┈└┊"]
+            border [border_style: "╔─╗│╝─╚│"]
                 align [alignment: "centre"]
                     text [id: "sky-left-text", foreground: "white"] "  you are here  "
 
@@ -39,7 +39,7 @@ vstack
 
         // right sky panel
         expand [id: "sky-right", background: #404090, foreground: #A0A0F0, fill: "oOo   "]
-            border [background: #5050A0, border_style: "┌┈┐┊┘┈└┊"]
+            border [background: #5050A0, border_style: "-┈-┊-┈-┊"]
                 align [alignment: "centre"]
                     text [id: "sky-right-text", foreground: "white"] "  you've got time  "
 
@@ -59,16 +59,8 @@ vstack
 align [alignment: "top_left"]
     padding [top: 6, left: 1]
         vstack [background: #000000, foreground: "white"]
-
-            // just a tag
-            vstack [width: 23, height: 1]
-                text "  ♥ party ♥ members ♥"
-
-            text " "
-
             // party member buns
-            for member in ["bun 0", "bun 1", "bun 2", "bun 3"]
-                hstack [width: 22, height: 3]
+            for member in bun_ids
+                hstack [width: 14, height: 3]
                     expand [fill: " "]
-                        @player_stats [id: member]
-                text " "
+                        @bunstats [id: member]

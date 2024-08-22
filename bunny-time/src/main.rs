@@ -24,11 +24,10 @@ const TITLE_FLAVORS: &[&str] = &[
     "goodly",
     "cutest",
     "friendly",
-    "self-loving",
     "hard-working",
     "well-rested",
     "well-loved",
-    "loving",
+    "ever-loving",
     "best",
     "kindly",
     "trustworthy",
@@ -42,41 +41,27 @@ const TITLE_FLAVORS: &[&str] = &[
     "sagely",
 ];
 
-fn text_bar_u8_8wide(value: u8, max: u8) -> String {
-    let bar_width: u8 = 9;
-    let filled = ((value * bar_width) / max + 1).min(bar_width);
-    let partial = {
-        match (value % (max / 8)) / 4 {
-            0 => ' ',
-            1 => '▏',
-            2 => '▎',
-            3 => '▍',
-            4 => '▌',
-            5 => '▋',
-            6 => '▊',
-            7 => '▉',
-            8 => '█',
-            _ => '?',
-        }
-    };
-    let final_filled = {
-        let mut res = String::new();
-        for i in 0..filled {
-            if i < filled - 1 {
-                res.push('█');
-            } else {
-                res.push(partial);
-            }
-        }
-        res
-    };
-    final_filled + &" ".repeat((bar_width - filled) as usize) + format!("{:02}", value).as_str()
+fn value_u8_formatted(value: u8, _max: u8) -> String {
+    format!("{:02}", value).to_string()
 }
 
 #[derive(State)]
 struct UIMainState {
     title_flavor: Value<String>,
+    bun_ids: Value<List<String>>,
 }
+
+impl UIMainState {
+    fn new() -> Self {
+        Self {
+            title_flavor: TITLE_FLAVORS[thread_rng().gen_range(0..TITLE_FLAVORS.len())]
+                .to_string()
+                .into(),
+            bun_ids: List::empty(),
+        }
+    }
+}
+
 struct UIMain {}
 impl Component for UIMain {
     type Message = ();
@@ -104,7 +89,7 @@ impl Component for UIMain {
 }
 
 #[derive(State)]
-struct PlayerStatsState {
+struct BunStatsState {
     user_color: Value<Hex>,
     sleep: Value<u8>,
     eat: Value<u8>,
@@ -112,11 +97,11 @@ struct PlayerStatsState {
     bar_eat: Value<String>,
 }
 
-struct PlayerStats {}
+struct BunStats {}
 
-impl Component for PlayerStats {
+impl Component for BunStats {
     type Message = ();
-    type State = PlayerStatsState;
+    type State = BunStatsState;
 
     fn tick(
         &mut self,
@@ -125,7 +110,6 @@ impl Component for PlayerStats {
         _context: Context<'_>,
         _dt: Duration,
     ) {
-        // hmmm
     }
 
     fn on_key(
@@ -151,30 +135,22 @@ fn main() {
     let mut runtime = Runtime::builder(doc, backend);
 
     let _ = runtime.register_prototype(
-        "player_stats",
-        "src/player_stats.aml",
-        || PlayerStats {},
-        || PlayerStatsState {
+        "bunstats",
+        "src/ui_bunstats.aml",
+        || BunStats {},
+        || BunStatsState {
             user_color: Hex::from((107, 107, 255)).into(),
             sleep: SLEEP_MAX.into(),
             eat: EAT_MAX.into(),
-            bar_sleep: text_bar_u8_8wide(SLEEP_MAX, SLEEP_MAX).into(),
-            bar_eat: text_bar_u8_8wide(EAT_MAX, EAT_MAX).into(),
+            bar_sleep: value_u8_formatted(SLEEP_MAX, SLEEP_MAX).into(),
+            bar_eat: value_u8_formatted(EAT_MAX, EAT_MAX).into(),
         },
     );
 
-    let flavor_index = thread_rng().gen_range(0..TITLE_FLAVORS.len());
+    let mut main_state = UIMainState::new();
+    main_state.bun_ids.push_back("bun".to_string());
     runtime
-        .register_component(
-            "main",
-            "src/ui.aml",
-            UIMain {},
-            UIMainState {
-                title_flavor: format!("{} ", TITLE_FLAVORS[flavor_index])
-                    .to_string()
-                    .into(),
-            },
-        )
+        .register_component("main", "src/ui.aml", UIMain {}, main_state)
         .unwrap();
 
     let mut runtime = runtime.finish().unwrap();
