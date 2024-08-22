@@ -1,0 +1,17 @@
+hstack
+    container [background: user_color, width: 6, height: 3]
+        align [alignment: "centre"]
+            vstack
+                text " (\_/)"
+                text " (•_•)"
+                text "o(u u)"
+    padding [left: 1]
+        vstack
+            hstack
+                vstack
+                    text [bold: true] "SLP "
+                    text [bold: true] "EAT "
+                vstack
+                    text [bold: true, foreground: "green"] bar_sleep
+                    text [bold: true, foreground: "green"] bar_eat
+            text "curious"

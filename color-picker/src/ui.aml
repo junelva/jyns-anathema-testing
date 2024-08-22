@@ -1,23 +1,11 @@
 zstack
     text "h/j/k/l: navigate; ctrl: precise edit"
     align [alignment: "centre"]
-        border
-            hstack
-                vstack
-                    if ui_sel_index == 0
-                        text [bold: true] ">R"
-                    else
-                        text " R"
-                    if ui_sel_index == 1
-                        text [bold: true] ">G"
-                    else
-                        text " G"
-                    if ui_sel_index == 2
-                        text [bold: true] ">B"
-                    else
-                        text " B"
-                vstack
-                    text [bold: ui_sel_index == 0, foreground: "red"] bar_r
-                    text [bold: ui_sel_index == 1, foreground: "green"] bar_g
-                    text [bold: ui_sel_index == 2, foreground: "blue"] bar_b
-                container [background: user_color, width: 5, height: 3]
+        vstack
+            for i in [0, 1, 2, 3]
+                if i == 0
+                    border [border_style: "╔─╗│╝─╚│", foreground: "white"]
+                        @pick_rgb
+                else
+                    border [border_style: "┌┈┐┊┘┈└┊"]
+                        @pick_rgb

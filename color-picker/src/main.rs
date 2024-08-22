@@ -38,7 +38,35 @@ fn text_bar_u8_8wide(value: u8) -> String {
 }
 
 #[derive(State)]
-struct RgbPicker {
+struct UIMainState {}
+struct UIMain {}
+impl Component for UIMain {
+    type Message = ();
+    type State = UIMainState;
+
+    fn tick(
+        &mut self,
+        _state: &mut Self::State,
+        _elements: Elements<'_, '_>,
+        _context: Context<'_>,
+        _dt: Duration,
+    ) {
+        // hmmm
+    }
+
+    fn on_key(
+        &mut self,
+        _key: KeyEvent,
+        _state: &mut Self::State,
+        _elements: Elements<'_, '_>,
+        _context: Context<'_>,
+    ) {
+        // hmmm?
+    }
+}
+
+#[derive(State)]
+struct PickRgbState {
     user_color: Value<Hex>,
     ui_sel_count: Value<u8>,
     ui_sel_index: Value<u8>,
@@ -47,11 +75,11 @@ struct RgbPicker {
     bar_b: Value<String>,
 }
 
-struct TestApp {}
+struct PickRgb {}
 
-impl Component for TestApp {
+impl Component for PickRgb {
     type Message = ();
-    type State = RgbPicker;
+    type State = PickRgbState;
 
     fn tick(
         &mut self,
@@ -170,24 +198,26 @@ fn main() {
         .finish()
         .unwrap();
 
-    let start_color = Hex::from((0, 64, 64));
-
     let mut runtime = Runtime::builder(doc, backend);
+
+    let _ = runtime.register_prototype(
+        "pick_rgb",
+        "src/pick_rgb.aml",
+        || PickRgb {},
+        || PickRgbState {
+            user_color: Hex::from((0, 64, 64)).into(),
+            ui_sel_count: 3u8.into(),
+            ui_sel_index: 0u8.into(),
+            bar_r: text_bar_u8_8wide(64).into(),
+            bar_g: text_bar_u8_8wide(64).into(),
+            bar_b: text_bar_u8_8wide(64).into(),
+        },
+    );
+
     runtime
-        .register_component(
-            "main",
-            "src/ui.aml",
-            TestApp {},
-            RgbPicker {
-                user_color: start_color.into(),
-                ui_sel_count: 3u8.into(),
-                ui_sel_index: 0u8.into(),
-                bar_r: text_bar_u8_8wide(start_color.r).into(),
-                bar_g: text_bar_u8_8wide(start_color.g).into(),
-                bar_b: text_bar_u8_8wide(start_color.b).into(),
-            },
-        )
+        .register_component("main", "src/ui.aml", UIMain {}, UIMainState {})
         .unwrap();
+
     let mut runtime = runtime.finish().unwrap();
     runtime.run();
 }
