@@ -39,6 +39,7 @@ const TITLE_FLAVORS: &[&str] = &[
     "creative",
     "patient",
     "sagely",
+    "calming",
 ];
 
 fn value_u8_formatted(value: u8, _max: u8) -> String {
