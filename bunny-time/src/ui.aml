@@ -20,28 +20,28 @@ vstack
                     text "┊"
             padding [left: 1]
                 vstack
-                    text "TIME: 06:00 MON"
-                    text "BUNS: 44 / 256"
+                    text "DATE: 06:00 MON"
+                    text "WIND: 44 / 256"
 
     hstack [height: 3]
 
         // left sky panel
-        expand [id: "sky-left", background: #303080, foreground: #A0A0F0, fill: "*   "]
+        expand [id: "sky-left", background: #303080, foreground: #A0A0F0, fill: " "]
             border [border_style: "╔─╗│╝─╚│"]
                 align [alignment: "centre"]
-                    text [id: "sky-left-text", foreground: "white"] "  you are here  "
+                    text [id: "sky-left-text", foreground: "white"] " you are here "
 
         // middle sky panel
-        expand [id: "sky-middle", background: #404090, foreground: #A0A0F0, fill: "-    "]
+        expand [id: "sky-middle", background: #404090, foreground: #A0A0F0, fill: " "]
             border [border_style: "┌┈┐┊┘┈└┊"]
                 align [alignment: "centre"]
-                    text [id: "sky-middle-text", foreground: "white"] "  you are safe  "
+                    text [id: "sky-middle-text", foreground: "white"] " you are safe "
 
         // right sky panel
-        expand [id: "sky-right", background: #404090, foreground: #A0A0F0, fill: "oOo   "]
+        expand [id: "sky-right", background: #404090, foreground: #A0A0F0, fill: " "]
             border [background: #5050A0, border_style: "-┈-┊-┈-┊"]
                 align [alignment: "centre"]
-                    text [id: "sky-right-text", foreground: "white"] "  you've got time  "
+                    text [id: "sky-right-text", foreground: "white"] " clouds go by "
 
     // main game view
     border [border_style: "┌┈┐┊┘┈└┊", background: #204020, foreground: #80D090]
@@ -58,9 +58,10 @@ vstack
 
 align [alignment: "top_left"]
     padding [top: 6, left: 1]
-        vstack [background: #000000, foreground: "white"]
+        vstack
             // party member buns
             for member in bun_ids
-                hstack [width: 14, height: 3]
-                    expand [fill: " "]
-                        @bunstats [id: member]
+                padding [bottom: 1]
+                    hstack [width: 14, height: 3]
+                        expand [fill: " ", background: #000000, foreground: "white"]
+                            @bunstats [id: member]

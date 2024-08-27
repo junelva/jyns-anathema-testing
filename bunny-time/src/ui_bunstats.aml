@@ -12,6 +12,6 @@ hstack
                     text [bold: true] "SLP "
                     text [bold: true] "EAT "
                 vstack
-                    text [bold: true, foreground: "green"] bar_sleep
+                    text [bold: true, foreground: "cyan"] bar_sleep
                     text [bold: true, foreground: "green"] bar_eat
             text "curious"

@@ -1,0 +1,45 @@
+hstack
+    border
+        hstack
+            vstack
+                hstack
+                    text "0"
+                    @ui_ptype_00
+                hstack
+                    text "1"
+                    @ui_ptype_00
+                hstack
+                    text "2"
+                    @ui_ptype_00
+                hstack
+                    text "3"
+                    @ui_ptype_00
+            padding [left: 1]
+                vstack
+                    hstack
+                        text "4"
+                        @ui_ptype_00
+                    hstack
+                        text "5"
+                        @ui_ptype_00
+                    hstack
+                        text "6"
+                        @ui_ptype_00
+                    hstack
+                        text "7"
+                        @ui_ptype_00
+    border
+        hstack
+            vstack
+                hstack
+                    text "BAT"
+                    @ui_ptype_00
+                hstack
+                    text "MEM"
+                    @ui_ptype_00
+                hstack
+                    text "DSK"
+                    @ui_ptype_00
+                hstack
+                    text "NET"
+                    @ui_ptype_00

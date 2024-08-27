@@ -3,9 +3,52 @@ use anathema::prelude::*;
 use anathema::state::Hex;
 use rand::{thread_rng, Rng};
 use std::time::Duration;
+use std::time::Instant;
 
 const SLEEP_MAX: u8 = 24;
 const EAT_MAX: u8 = 24;
+
+const FRAME_COUNT: isize = 4;
+const WEATHER_CHANGE_PER_TICKS: usize = 8;
+const WEATHER_PATTERNS: &[&str] = &[
+    "   *", "  * ", " *  ", "*   ", "   ~", "  ~ ", " ~  ", "~   ", " oOo", "oOo ", "Oo o", "o oO",
+    "/// ", "// //", "/ ///", " ///", "* * ", " * *", "* * ", " * *", "~~~ ", "~~ ~", "~ ~~",
+    " ~~~", ". . ", " . .", ". . ", " . .",
+];
+
+#[derive(Clone, Copy)]
+enum WeatherPattern {
+    Star = 0,
+    Wind = FRAME_COUNT,
+    Cloud = FRAME_COUNT * 2,
+    Rain = FRAME_COUNT * 3,
+    Snow = FRAME_COUNT * 4,
+    Wimdy = FRAME_COUNT * 5,
+    Peaceful = FRAME_COUNT * 6,
+}
+
+fn weather_scrolled_fill(scroll: usize, fill_type: WeatherPattern) -> &'static str {
+    let scroll = scroll % FRAME_COUNT as usize;
+    WEATHER_PATTERNS[fill_type as usize + scroll]
+}
+
+fn cycle_weather(states: &[WeatherPattern; 3]) -> [WeatherPattern; 3] {
+    let mut rng = rand::thread_rng();
+    [
+        states[1],
+        states[2],
+        match rng.gen_range(0..7) {
+            0 => WeatherPattern::Star,
+            1 => WeatherPattern::Wind,
+            2 => WeatherPattern::Cloud,
+            3 => WeatherPattern::Rain,
+            4 => WeatherPattern::Snow,
+            5 => WeatherPattern::Wimdy,
+            6 => WeatherPattern::Peaceful,
+            _ => WeatherPattern::Peaceful,
+        },
+    ]
+}
 
 const TITLE_FLAVORS: &[&str] = &[
     "beautiful",
@@ -63,7 +106,30 @@ impl UIMainState {
     }
 }
 
-struct UIMain {}
+struct UIMain {
+    app_start: Instant,
+    time_secs: f64,     // this value is only updated on an animation tick
+    anim_tick: usize,   // this value goes up every n seconds
+    anim_tick_per: f64, // seconds per animation tick
+    weather_states: [WeatherPattern; 3],
+}
+
+impl UIMain {
+    fn new() -> Self {
+        Self {
+            app_start: Instant::now(),
+            time_secs: 0.0f64,
+            anim_tick: 0usize,
+            anim_tick_per: 1.0,
+            weather_states: [
+                WeatherPattern::Star,
+                WeatherPattern::Wind,
+                WeatherPattern::Cloud,
+            ],
+        }
+    }
+}
+
 impl Component for UIMain {
     type Message = ();
     type State = UIMainState;
@@ -71,11 +137,49 @@ impl Component for UIMain {
     fn tick(
         &mut self,
         _state: &mut Self::State,
-        _elements: Elements<'_, '_>,
+        mut elements: Elements<'_, '_>,
         _context: Context<'_>,
         _dt: Duration,
     ) {
-        // hmmm
+        let time_now_secs = self.app_start.elapsed().as_secs_f64();
+        if self.time_secs + self.anim_tick_per < time_now_secs {
+            self.time_secs = time_now_secs;
+            self.anim_tick += 1;
+
+            if self.anim_tick % WEATHER_CHANGE_PER_TICKS == 0 {
+                self.weather_states = cycle_weather(&self.weather_states);
+            }
+
+            elements
+                .query()
+                .by_attribute("id", "sky-left")
+                .first(|_e, a| {
+                    a.set(
+                        "fill",
+                        weather_scrolled_fill(self.anim_tick, self.weather_states[0]),
+                    );
+                });
+
+            elements
+                .query()
+                .by_attribute("id", "sky-middle")
+                .first(|_e, a| {
+                    a.set(
+                        "fill",
+                        weather_scrolled_fill(self.anim_tick, self.weather_states[1]),
+                    );
+                });
+
+            elements
+                .query()
+                .by_attribute("id", "sky-right")
+                .first(|_e, a| {
+                    a.set(
+                        "fill",
+                        weather_scrolled_fill(self.anim_tick, self.weather_states[2]),
+                    );
+                });
+        }
     }
 
     fn on_key(
@@ -150,8 +254,10 @@ fn main() {
 
     let mut main_state = UIMainState::new();
     main_state.bun_ids.push_back("bun".to_string());
+    main_state.bun_ids.push_back("bun".to_string());
+    main_state.bun_ids.push_back("bun".to_string());
     runtime
-        .register_component("main", "src/ui.aml", UIMain {}, main_state)
+        .register_component("main", "src/ui.aml", UIMain::new(), main_state)
         .unwrap();
 
     let mut runtime = runtime.finish().unwrap();
