@@ -9,7 +9,7 @@ const SLEEP_MAX: u8 = 24;
 const EAT_MAX: u8 = 24;
 
 const FRAME_COUNT: isize = 4;
-const WEATHER_CHANGE_PER_TICKS: usize = 8;
+const WEATHER_CHANGE_PER_TICKS: usize = 10;
 const WEATHER_PATTERNS: &[&str] = &[
     "   *", "  * ", " *  ", "*   ", "   ~", "  ~ ", " ~  ", "~   ", " oOo", "oOo ", "Oo o", "o oO",
     "/// ", "// //", "/ ///", " ///", "* * ", " * *", "* * ", " * *", "~~~ ", "~~ ~", "~ ~~",
@@ -25,6 +25,28 @@ enum WeatherPattern {
     Snow = FRAME_COUNT * 4,
     Wimdy = FRAME_COUNT * 5,
     Peaceful = FRAME_COUNT * 6,
+}
+
+const WEATHER_FORECAST: &[&str] = &[
+    "stars shine",
+    "wind passes",
+    "clouds go by",
+    "rain may come",
+    "snow may fall",
+    "sometimes it's wimdy",
+    "stillness, silence",
+];
+
+fn weather_forecast(state: WeatherPattern) -> &'static str {
+    match state {
+        WeatherPattern::Star => WEATHER_FORECAST[0],
+        WeatherPattern::Wind => WEATHER_FORECAST[1],
+        WeatherPattern::Cloud => WEATHER_FORECAST[2],
+        WeatherPattern::Rain => WEATHER_FORECAST[3],
+        WeatherPattern::Snow => WEATHER_FORECAST[4],
+        WeatherPattern::Wimdy => WEATHER_FORECAST[5],
+        WeatherPattern::Peaceful => WEATHER_FORECAST[6],
+    }
 }
 
 fn weather_scrolled_fill(scroll: usize, fill_type: WeatherPattern) -> &'static str {
@@ -85,6 +107,19 @@ const TITLE_FLAVORS: &[&str] = &[
     "calming",
 ];
 
+const FUTURE_FLAVORS: &[&str] = &[
+    "you are safe",
+    "it's ok",
+    "take some time",
+    "you're all right",
+    "this is fine",
+    "we'll be ok",
+    "it takes time",
+    "you'll get through",
+    "it'll be ok",
+    "actually ok",
+];
+
 fn value_u8_formatted(value: u8, _max: u8) -> String {
     format!("{:02}", value).to_string()
 }
@@ -93,15 +128,30 @@ fn value_u8_formatted(value: u8, _max: u8) -> String {
 struct UIMainState {
     title_flavor: Value<String>,
     bun_ids: Value<List<String>>,
+    string_lvl: Value<String>,
+    string_exp: Value<String>,
+    string_date: Value<String>,
+    string_wind: Value<String>,
+    string_future: Value<String>,
+    string_forecast: Value<String>,
 }
 
 impl UIMainState {
     fn new() -> Self {
+        let mut rng = rand::thread_rng();
         Self {
             title_flavor: TITLE_FLAVORS[thread_rng().gen_range(0..TITLE_FLAVORS.len())]
                 .to_string()
                 .into(),
             bun_ids: List::empty(),
+            string_lvl: "???".to_string().into(),
+            string_exp: "???".to_string().into(),
+            string_date: "???".to_string().into(),
+            string_wind: "???".to_string().into(),
+            string_future: FUTURE_FLAVORS[rng.gen_range(0..FUTURE_FLAVORS.len())]
+                .to_string()
+                .into(),
+            string_forecast: weather_forecast(WeatherPattern::Cloud).to_string().into(),
         }
     }
 }
@@ -112,6 +162,9 @@ struct UIMain {
     anim_tick: usize,   // this value goes up every n seconds
     anim_tick_per: f64, // seconds per animation tick
     weather_states: [WeatherPattern; 3],
+    lvl: usize,
+    exp: usize,
+    wind: usize,
 }
 
 impl UIMain {
@@ -126,6 +179,9 @@ impl UIMain {
                 WeatherPattern::Wind,
                 WeatherPattern::Cloud,
             ],
+            lvl: 0,
+            exp: 0,
+            wind: 0,
         }
     }
 }
@@ -136,18 +192,40 @@ impl Component for UIMain {
 
     fn tick(
         &mut self,
-        _state: &mut Self::State,
+        state: &mut Self::State,
         mut elements: Elements<'_, '_>,
         _context: Context<'_>,
         _dt: Duration,
     ) {
+        *state.string_lvl.to_mut() = format!("{:2}", self.lvl).to_string();
+        *state.string_exp.to_mut() = format!("{:2}", self.exp).to_string();
+        *state.string_wind.to_mut() = format!("{:3}", self.wind).to_string();
+        *state.string_date.to_mut() =
+            format!("{}", chrono::offset::Local::now().format("%H:%M %a"))
+                .to_string()
+                .to_uppercase();
+
         let time_now_secs = self.app_start.elapsed().as_secs_f64();
         if self.time_secs + self.anim_tick_per < time_now_secs {
             self.time_secs = time_now_secs;
             self.anim_tick += 1;
 
+            self.exp += 1;
+            if self.exp >= 60 {
+                self.exp = 0;
+                self.lvl += 1;
+                if self.lvl > 60 {
+                    self.lvl = 60;
+                }
+            }
+
             if self.anim_tick % WEATHER_CHANGE_PER_TICKS == 0 {
                 self.weather_states = cycle_weather(&self.weather_states);
+                *state.string_forecast.to_mut() =
+                    weather_forecast(self.weather_states[2]).to_string();
+                let mut rng = rand::thread_rng();
+                *state.string_future.to_mut() =
+                    FUTURE_FLAVORS[rng.gen_range(0..FUTURE_FLAVORS.len())].to_string()
             }
 
             elements

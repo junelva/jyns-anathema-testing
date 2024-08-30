@@ -40,7 +40,7 @@ impl Component for UiPtype00 {
         &mut self,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
         _dt: Duration,
     ) {
     }
@@ -50,7 +50,7 @@ impl Component for UiPtype00 {
         _key: KeyEvent,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
     ) {
     }
 }
@@ -63,7 +63,7 @@ impl Component for UiPtype01 {
         &mut self,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
         _dt: Duration,
     ) {
     }
@@ -73,7 +73,7 @@ impl Component for UiPtype01 {
         _key: KeyEvent,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
     ) {
     }
 }
@@ -86,7 +86,7 @@ impl Component for UiPtype02 {
         &mut self,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
         _dt: Duration,
     ) {
     }
@@ -96,7 +96,7 @@ impl Component for UiPtype02 {
         _key: KeyEvent,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
     ) {
     }
 }
@@ -109,7 +109,7 @@ impl Component for UIMain {
         &mut self,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
         _dt: Duration,
     ) {
         self.time_secs = self.app_start.elapsed().as_secs_f64();
@@ -120,7 +120,7 @@ impl Component for UIMain {
         _key: KeyEvent,
         _state: &mut Self::State,
         _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        _context: Context<'_, Self::State>,
     ) {
         // hmmm?
     }

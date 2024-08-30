@@ -1,12 +1,12 @@
 [package]
-name = "bunny-time"
+name = "canvas-effect"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chrono = "0.4.38"
 rand = "0.8.5"
 
 [dependencies.anathema]
+# path = "../../anathema"
 git = "https://github.com/togglebyte/anathema.git"
 branch = "dev"
