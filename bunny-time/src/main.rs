@@ -121,7 +121,7 @@ const FUTURE_FLAVORS: &[&str] = &[
 ];
 
 fn value_u8_formatted(value: u8, _max: u8) -> String {
-    format!("{:02}", value).to_string()
+    format!("{value:02}").to_string()
 }
 
 #[derive(State)]
@@ -143,7 +143,7 @@ impl UIMainState {
             title_flavor: TITLE_FLAVORS[thread_rng().gen_range(0..TITLE_FLAVORS.len())]
                 .to_string()
                 .into(),
-            bun_ids: List::empty(),
+            bun_ids: Value::<List<String>>::new(List::<String>::empty()),
             string_lvl: "???".to_string().into(),
             string_exp: "???".to_string().into(),
             string_date: "???".to_string().into(),
@@ -190,11 +190,11 @@ impl Component for UIMain {
     type Message = ();
     type State = UIMainState;
 
-    fn tick(
+    fn on_tick(
         &mut self,
         state: &mut Self::State,
-        mut elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        mut children: Children<'_, '_>,
+        _context: Context<'_, '_, Self::State>,
         _dt: Duration,
     ) {
         *state.string_lvl.to_mut() = format!("{:2}", self.lvl).to_string();
@@ -228,46 +228,44 @@ impl Component for UIMain {
                     FUTURE_FLAVORS[rng.gen_range(0..FUTURE_FLAVORS.len())].to_string()
             }
 
-            elements
-                .query()
-                .by_attribute("id", "sky-left")
-                .first(|_e, a| {
-                    a.set(
-                        "fill",
-                        weather_scrolled_fill(self.anim_tick, self.weather_states[0]),
-                    );
-                });
+            let mut elements = children.elements();
+            elements.by_attribute("id", "sky-left").first(|_e, a| {
+                a.set(
+                    "fill",
+                    weather_scrolled_fill(self.anim_tick, self.weather_states[0]),
+                );
+            });
 
-            elements
-                .query()
-                .by_attribute("id", "sky-middle")
-                .first(|_e, a| {
-                    a.set(
-                        "fill",
-                        weather_scrolled_fill(self.anim_tick, self.weather_states[1]),
-                    );
-                });
+            elements.by_attribute("id", "sky-middle").first(|_e, a| {
+                a.set(
+                    "fill",
+                    weather_scrolled_fill(self.anim_tick, self.weather_states[1]),
+                );
+            });
 
-            elements
-                .query()
-                .by_attribute("id", "sky-right")
-                .first(|_e, a| {
-                    a.set(
-                        "fill",
-                        weather_scrolled_fill(self.anim_tick, self.weather_states[2]),
-                    );
-                });
+            elements.by_attribute("id", "sky-right").first(|_e, a| {
+                a.set(
+                    "fill",
+                    weather_scrolled_fill(self.anim_tick, self.weather_states[2]),
+                );
+            });
         }
     }
 
     fn on_key(
         &mut self,
-        _key: KeyEvent,
+        key: KeyEvent,
         _state: &mut Self::State,
-        _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        mut _children: Children<'_, '_>,
+        mut context: Context<'_, '_, Self::State>,
     ) {
-        // hmmm?
+        match key.code {
+            KeyCode::Char('a') => {}
+            KeyCode::Char('q') => {
+                context.stop_runtime();
+            }
+            _ => {}
+        }
     }
 }
 
@@ -286,38 +284,41 @@ impl Component for BunStats {
     type Message = ();
     type State = BunStatsState;
 
-    fn tick(
+    fn on_tick(
         &mut self,
         _state: &mut Self::State,
-        _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        mut _children: Children<'_, '_>,
+        _context: Context<'_, '_, Self::State>,
         _dt: Duration,
     ) {
+        // hmmm
     }
 
     fn on_key(
         &mut self,
         _key: KeyEvent,
         _state: &mut Self::State,
-        _elements: Elements<'_, '_>,
-        _context: Context<'_>,
+        mut _children: Children<'_, '_>,
+        mut _context: Context<'_, '_, Self::State>,
     ) {
+        // hmmm?
     }
 }
 
 fn main() {
     let doc = Document::new("@main");
 
-    let backend = TuiBackend::builder()
+    let mut backend = TuiBackend::builder()
         .enable_alt_screen()
         .enable_raw_mode()
         .hide_cursor()
         .finish()
         .unwrap();
+    backend.clear();
 
-    let mut runtime = Runtime::builder(doc, backend);
+    let mut builder = Runtime::builder(doc, &backend);
 
-    let _ = runtime.register_prototype(
+    let _ = builder.prototype(
         "bunstats",
         "src/ui_bunstats.aml",
         || BunStats {},
@@ -334,10 +335,11 @@ fn main() {
     main_state.bun_ids.push_back("bun".to_string());
     main_state.bun_ids.push_back("bun".to_string());
     main_state.bun_ids.push_back("bun".to_string());
-    runtime
-        .register_component("main", "src/ui.aml", UIMain::new(), main_state)
+    builder
+        .component("main", "src/ui.aml", UIMain::new(), main_state)
         .unwrap();
 
-    let mut runtime = runtime.finish().unwrap();
-    runtime.run();
+    builder
+        .finish(&mut backend, |runtime, backend| runtime.run(backend))
+        .unwrap();
 }

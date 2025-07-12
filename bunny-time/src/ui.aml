@@ -3,7 +3,7 @@ vstack
     // info text
     hstack [height: 2]
         vstack [height: 2, foreground: "white"]
-            text "Presenting: the " title_flavor " buns."
+            text "Presenting: the " state.title_flavor " buns."
             text" '←/↑/↓/→': move; 'space': ok"
         spacer
         hstack
@@ -12,16 +12,16 @@ vstack
                 text "┊"
             padding [left: 1]
                 vstack
-                    text "LVL: " string_lvl " / 60"
-                    text "EXP: " string_exp " / 60"
+                    text "LVL: " state.string_lvl " / 60"
+                    text "EXP: " state.string_exp " / 60"
             padding [left: 1]
                 vstack
                     text "┊"
                     text "┊"
             padding [left: 1]
                 vstack
-                    text "DATE: " string_date
-                    text "WIND: " string_wind " / 256"
+                    text "DATE: " state.string_date
+                    text "WIND: " state.string_wind " / 256"
 
     hstack [height: 3]
 
@@ -35,13 +35,13 @@ vstack
         expand [id: "sky-middle", background: #404090, foreground: #A0A0F0, fill: " "]
             border [border_style: "┌┈┐┊┘┈└┊"]
                 align [alignment: "centre"]
-                    text [id: "sky-middle-text", foreground: "white"] " " string_future " "
+                    text [id: "sky-middle-text", foreground: "white"] " " state.string_future " "
 
         // right sky panel
         expand [id: "sky-right", background: #404090, foreground: #A0A0F0, fill: " "]
             border [background: #5050A0, border_style: "-┈-┊-┈-┊"]
                 align [alignment: "centre"]
-                    text [id: "sky-right-text", foreground: "white"] " " string_forecast " "
+                    text [id: "sky-right-text", foreground: "white"] " " state.string_forecast " "
 
     // main game view
     border [border_style: "┌┈┐┊┘┈└┊", background: #204020, foreground: #80D090]
@@ -60,7 +60,7 @@ align [alignment: "top_left"]
     padding [top: 6, left: 1]
         vstack
             // party member buns
-            for member in bun_ids
+            for member in state.bun_ids
                 padding [bottom: 1]
                     hstack [width: 14, height: 3]
                         expand [fill: " ", background: #000000, foreground: "white"]
